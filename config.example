@@ -1,0 +1,5 @@
+# Example values for the process environment. The app does not automatically load this file.
+NIGHT_SHIFT_MODE=mock
+NIGHT_SHIFT_ALLOW_LIVE=NO
+NIGHT_SHIFT_CONNECTION=
+NIGHT_SHIFT_MODEL=

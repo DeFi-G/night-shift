@@ -1,0 +1,227 @@
+{
+  "detached_during_this_demo": false,
+  "elapsed_seconds": 5.341,
+  "events": [
+    {
+      "at": "2026-11-27T14:05:56.167+00:00",
+      "message": "Original uploads saved and indexed.",
+      "state": "READY"
+    },
+    {
+      "at": "2026-11-27T14:05:56.167+00:00",
+      "message": "Waiting for the worker.",
+      "state": "QUEUED"
+    },
+    {
+      "at": "2026-11-27T14:05:56.184+00:00",
+      "message": "Worker accepted the assignment.",
+      "state": "CLOCKED_IN"
+    },
+    {
+      "at": "2026-11-27T14:05:56.477+00:00",
+      "message": "Collected E1 using inventory.",
+      "state": "WORKING"
+    },
+    {
+      "at": "2026-11-27T14:05:57.455+00:00",
+      "message": "Collected E2 using inspect.",
+      "state": "WORKING"
+    },
+    {
+      "at": "2026-11-27T14:05:58.496+00:00",
+      "message": "Collected E3 using read.",
+      "state": "WORKING"
+    },
+    {
+      "at": "2026-11-27T14:06:01.499+00:00",
+      "message": "Checking original and project hashes and evidence references.",
+      "state": "VERIFYING"
+    },
+    {
+      "at": "2026-11-27T14:06:01.508+00:00",
+      "message": "Report saved. File integrity verified.",
+      "state": "COMPLETED"
+    }
+  ],
+  "historical_emergency_stop": true,
+  "job": "4c8492b1e31c4132ae4c34016ad68d59",
+  "ledger": {
+    "budget_usd": 0.00768,
+    "disabled": true,
+    "estimated_actual_usd": 0.00039285,
+    "input_tokens": 1547,
+    "output_tokens": 268,
+    "requests": 3,
+    "reserved_usd": 0.004608,
+    "unresolved": 0
+  },
+  "limitations": [
+    "V12 live demonstration completed before client disconnection.",
+    "Inference costs are provisional internal estimates.",
+    "Report inspection is bounded by documented sampling limits.",
+    "Dashboard displays raw Markdown formatting."
+  ],
+  "mode": "ollama",
+  "model": "gpt-oss:20b",
+  "notifications": [
+    {
+      "created": "2026-11-27T14:05:56.205769+00:00",
+      "finished": "2026-11-27T14:05:56.466887+00:00",
+      "http_status": 200,
+      "job": "4c8492b1e31c4132ae4c34016ad68d59",
+      "state": "CLOCKED_IN",
+      "status": "DELIVERED"
+    },
+    {
+      "created": "2026-11-27T14:06:01.515642+00:00",
+      "finished": "2026-11-27T14:06:01.845989+00:00",
+      "http_status": 200,
+      "job": "4c8492b1e31c4132ae4c34016ad68d59",
+      "state": "COMPLETED",
+      "status": "DELIVERED"
+    }
+  ],
+  "owner_observed_accuracy": "5/5",
+  "previous_detached_test": "V9.3",
+  "qualification": "V12_COMBINED_LIVE_PASSED",
+  "remaining_task_holds": 0,
+  "report": {
+    "assignment": "Review the uploaded production schedule. Read the file, calculate the total production time, identify the longest assignment, and determine whether the available production time is sufficient. Calculate any shortfall and generate a final report with supporting evidence.",
+    "evidence": [
+      {
+        "action": {
+          "tool": "inventory"
+        },
+        "id": 1,
+        "result": [
+          {
+            "bytes": 187,
+            "path": "night-shift-final-demo.txt"
+          }
+        ]
+      },
+      {
+        "action": {
+          "tool": "inspect"
+        },
+        "id": 2,
+        "result": {
+          "extensions": {
+            ".txt": 1
+          },
+          "files": 1,
+          "manifests": []
+        }
+      },
+      {
+        "action": {
+          "path": "night-shift-final-demo.txt",
+          "tool": "read"
+        },
+        "id": 3,
+        "result": [
+          {
+            "line": 1,
+            "path": "night-shift-final-demo.txt",
+            "text": "DEFI MEDIA STUDIO - PRODUCTION SCHEDULE"
+          },
+          {
+            "line": 2,
+            "path": "night-shift-final-demo.txt",
+            "text": ""
+          },
+          {
+            "line": 3,
+            "path": "night-shift-final-demo.txt",
+            "text": "Gameplay highlights: 38 minutes"
+          },
+          {
+            "line": 4,
+            "path": "night-shift-final-demo.txt",
+            "text": "Music promotional video: 24 minutes"
+          },
+          {
+            "line": 5,
+            "path": "night-shift-final-demo.txt",
+            "text": "Animated series teaser: 31 minutes"
+          },
+          {
+            "line": 6,
+            "path": "night-shift-final-demo.txt",
+            "text": ""
+          },
+          {
+            "line": 7,
+            "path": "night-shift-final-demo.txt",
+            "text": "Available production time: 80 minutes"
+          }
+        ]
+      }
+    ],
+    "inference_requests": 3,
+    "inputs": {
+      "files": [
+        {
+          "bytes": 187,
+          "path": "night-shift-final-demo.txt",
+          "sha256": "557a52002fe3b185c972aadffaf86ca077fef68f15ad97a8196817d2090fc497"
+        }
+      ],
+      "originals": [
+        {
+          "bytes": 187,
+          "name": "night-shift-final-demo.txt",
+          "sha256": "557a52002fe3b185c972aadffaf86ca077fef68f15ad97a8196817d2090fc497"
+        }
+      ]
+    },
+    "job": "4c8492b1e31c4132ae4c34016ad68d59",
+    "mode": "ollama",
+    "references": [
+      3
+    ],
+    "scope": "Static inspection. Text reads sample 20 lines and searches sample 32 KiB per file, up to 20 hits. Excerpts show up to 240 characters per line.",
+    "summary": "**Final Production Report**\n\n1. **Total production time required:** 93 minutes (Gameplay highlights 38\u202fmin + Music promotional video 24\u202fmin + Animated series teaser 31\u202fmin).\n2. **Longest individual assignment:** Gameplay highlights \u2013 38 minutes.\n3. **Available production time:** 80 minutes.\n4. **Sufficiency assessment:** The required time exceeds available time by 13 minutes.\n5. **Shortfall:** 13-minute deficit must be addressed either by extending the schedule or reducing workload.\n\n*Supporting evidence:* The production schedule lists the three assignments and the available time (see evidence ID\u202f3).",
+    "verified_at": "2026-11-27T14:06:01.507+00:00"
+  },
+  "report_sha256": {
+    "json": "9a00d076ae6ee44802190af19155736db372fc6b0068cff02cc90afca5252f31",
+    "markdown": "41f02a3000f08e186addd5d2b1c978058199577ad484659a08a311c19ac06ea7"
+  },
+  "sealed_at": "2026-11-27T14:13:02.742945+00:00",
+  "source_manifest": {
+    "IMPLEMENTATION.md": "0a756c394c52b6dac9026411d1328ef057f9897da82552b44ea1bbcd280008e1",
+    "README.md": "09b29335c6e3c298b15b8ebe10d7a192c61492a5493cb1d80a65261cc790870a",
+    "SPRITE.md": "77507eb92657c7ecf2b3eb16d2ae47fb946160e5ef9dcbb1332dae6abf63c63e",
+    "app.py": "79ce74e62b32c71bf273ba1f95f6ba0a4fb6fb0e728302316bd1389b2f64a463",
+    "config.example": "7189204e7a35db32c0d6ba31e8bf0a82180239e14fb0d01f2dd2992f8c7253bc",
+    "demo/checklist.txt": "910da733d8cb24a666068256b427120a471bf100c4d2d91e6cebbbc463fa385a",
+    "demo/release.md": "96fadae67a1f16278f6d01e82a26926e9db5266f67c4cb466d7b190864dc4c7a",
+    "demo_worker.py": "0a97fea17d696141775b1b8a4a82793de6fe85f273fc7dbdbc8f821eb4f95d2c",
+    "discord_notify.py": "24f30642131ba10a9eff2e466a8c7cb77f3ce2474892cda5b5f1bc60b4fedd5d",
+    "engine.py": "49300fdc3efb5c7263bb09a473cf52a33f8eb6087d1ba538102f76b511d9b593",
+    "example-report.md": "bdfe66a669cb48de0afaecda2d6cf9f0c31a2d9a935ac5095dad623c00879b6f",
+    "inference_ledger.py": "76f4755917826e8a26d22760e94f70e96281ed8c2d8af5532d05773250b3dd02",
+    "notification_worker.py": "d02cd7f6c3a93380f6ce145fae62384543ed8e5ac5c41974ee6185db92edf3ae",
+    "provider.py": "d432db314d7988689b5d2301d8802d5e2738264d11aca8c7c0271028433f105f",
+    "response_adapter.pre-parser-fix.txt": "ba63a16ec1c74e1bb8dc38479dc2ce4c3a2a34845d87f98fffe2a234adc17acd",
+    "response_adapter.py": "77c88054aedaf2d814f67c44efa6193f2c29f67ea03203622f772774b0f2f813",
+    "sprite-start-live-demo.sh": "d0dcbda2bc65d5906a15bc2e44353806a2fa39ee00a2e27fe309001e9aa77103",
+    "sprite-start-preview.sh": "1015a0560392daa4de4aad9fb0861391346682eb3c58d96be44778001aa9d72e",
+    "sprite-start-v11-preview.sh": "9df035e6c323cfcc62369b256c07a03bed8a43e3528cbcf9ea53f2e1e4771ae2",
+    "sprite-start-v12-preview.sh": "70c1f39333a4c6a6995cdd69b7136a425e91004df698c86d6e167cdaf01de7a6",
+    "sprite_worker.py": "fd3255a8afee47f37dc5ec5845cd50537940a86f10196e338496b6d513998903",
+    "test_night_shift.py": "b48cb3d976a8782e544b8254a249a5307befc6f7bf60b4ce76db9b46796e887b",
+    "test_v93_protocol.py": "195cca4c8e9baf1418de591697283eef21227a532d99d4e7e94493a98a1e8770",
+    "test_v9_qualification.py": "2b6db028d75228989a7ff96833c76c383eb2a4eb5c88f48ae5c2b5b6e3f54fd6",
+    "web/app.css": "96b934c7ff39ffff2c2d8da620774627d9183a03e0f499699ae9532c5879bbf1",
+    "web/app.js": "2e53626e71581f397433ecc889f06feae2c19f8efe3db8bbd993255f6ef8e415",
+    "web/emblem.png": "605e911f7d274b3b0689ec73f5af4b7584342a48cbe799b5c8a96d013dad080a",
+    "web/favicon.png": "761297d6373c7e9c41524e257459e35ebdd668d71f05407348c4186949ca77f2",
+    "web/index.html": "76d0d2b9a70290df88634b356cf596baedf5cf082029924d206d27c6bd8abb98",
+    "web/logo.png": "878f746181e49d4ddb271a657d5af6b22d12cccaa6600a2650df9f32ee8cbaac",
+    "workspace.py": "73ac5f745f28510c5ac19f19df355a1aa987878eca10b72822e4d01526d43f6d"
+  },
+  "state": "COMPLETED",
+  "synthetic_safeguards": "29/29"
+}
