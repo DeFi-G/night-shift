@@ -105,7 +105,71 @@ def excerpt(root, row):
         return []
 
 
+def analytical_tool(root, manifest, action):
+    import csv
+    from analytics import calculate, analyze_csv, MAX_BYTES
+
+    name = action.get("tool")
+
+    if name == "calculate":
+        if set(action) != {"tool", "operation", "left", "right"}:
+            raise ValueError("Invalid calculation arguments")
+
+        return calculate(
+            action["operation"],
+            action["left"],
+            action["right"]
+        )
+
+    if name == "analyze_csv":
+        if set(action) != {"tool", "path"}:
+            raise ValueError("Invalid CSV arguments")
+
+        row = next(
+            (r for r in manifest["files"]
+             if r["path"] == action["path"]),
+            None
+        )
+
+        if row is None:
+            raise ValueError("Unknown project path")
+
+        path = root / safe_name(row["path"])
+
+        if (
+            path.resolve() != root.absolute() / row["path"]
+            or not path.is_file()
+            or path.suffix.lower() != ".csv"
+        ):
+            raise ValueError("Invalid analytical source")
+
+        with path.open("rb") as handle:
+            data = handle.read(MAX_BYTES + 1)
+
+        if len(data) > MAX_BYTES:
+            raise ValueError("CSV exceeds analytical size limit")
+
+        if digest(data) != row["sha256"]:
+            raise ValueError("Analytical source integrity mismatch")
+
+        try:
+            result = analyze_csv(data)
+        except (csv.Error, UnicodeDecodeError):
+            raise ValueError("Malformed CSV source") from None
+
+        return {
+            "path": row["path"],
+            "sha256": row["sha256"],
+            "analysis": result
+        }
+
+    raise ValueError("Unsupported analytical tool")
+
+
 def tool(root, manifest, action):
+    if action.get("tool") in ("calculate", "analyze_csv"):
+        return analytical_tool(root, manifest, action)
+
     rows = manifest["files"]
     name = action.get("tool")
     if name in ("inventory", "inspect") and set(action) == {"tool"}:

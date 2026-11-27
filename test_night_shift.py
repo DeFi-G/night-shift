@@ -224,25 +224,93 @@ class JobTests(unittest.TestCase):
             another.start()
 
     def test_gateway_contract_and_live_gate(self):
+        from inference_ledger import Ledger, MODEL
+
         with self.assertRaises(ValueError):
-            Ollama("example", "model", "")
+            Ollama("example", MODEL, "")
+
         with self.assertRaises(ValueError):
-            Ollama("../other", "model", "YES")
-        with patch("provider.http.client.HTTPSConnection") as transport:
-            client = transport.return_value
-            client.getresponse.return_value.status = 200
-            client.getresponse.return_value.read.return_value = b'{"message":{"content":"ok"}}'
-            pipe = MagicMock()
-            gateway(pipe, "example", "synthetic-model", [])
-            transport.assert_called_once_with("api.sprites.dev", timeout=15)
-            method, path, body, headers = client.request.call_args.args
-            self.assertEqual((method,path), ("POST","/v1/gateway/ollama/example/api/chat"))
-            self.assertFalse(json.loads(body)["stream"])
-            self.assertNotIn("Authorization", headers)
-            pipe.send.assert_called_once_with((True, "ok"))
+            Ollama("../other", MODEL, "YES")
+
+        with self.assertRaises(ValueError):
+            Ollama("example", "synthetic-model", "YES")
+
+        with tempfile.TemporaryDirectory() as temp:
+            ledger = Ledger.initialize(Path(temp) / "ledger")
+
+            with patch("provider.Ledger", return_value=ledger), patch("provider.http.client.HTTPSConnection") as transport:
+                client = transport.return_value
+                response = client.getresponse.return_value
+                response.status = 200
+
+                expected = {
+                    "finish": "Synthetic report.",
+                    "references": [1]
+                }
+
+                response.read.return_value = json.dumps({
+                    "model": MODEL,
+                    "done": True,
+                    "prompt_eval_count": 100,
+                    "eval_count": 20,
+                    "message": {
+                        "content": json.dumps(expected)
+                    }
+                }).encode()
+
+                context = {
+                    "assignment": "Synthetic gateway qualification.",
+                    "evidence": [{
+                        "id": 1,
+                        "action": {"tool": "inventory"},
+                        "result": []
+                    }],
+                    "requests_left": 5,
+                    "correction": ""
+                }
+
+                messages = [
+                    {"role": "system", "content": "Synthetic guide"},
+                    {"role": "user", "content": json.dumps(context)}
+                ]
+
+                pipe = MagicMock()
+                gateway(pipe, "example", MODEL, messages)
+
+                transport.assert_called_once_with(
+                    "api.sprites.dev", timeout=15
+                )
+
+                method, path, body, headers = client.request.call_args.args
+
+                self.assertEqual(
+                    (method, path),
+                    ("POST", "/v1/gateway/ollama/example/api/chat")
+                )
+
+                payload = json.loads(body)
+
+                self.assertFalse(payload["stream"])
+                self.assertEqual(payload["model"], MODEL)
+                self.assertEqual(payload["format"], "json")
+                self.assertNotIn("tools", payload)
+                self.assertNotIn("Authorization", headers)
+                self.assertEqual(payload["options"]["num_ctx"], 8192)
+                self.assertEqual(payload["options"]["num_predict"], 512)
+
+                pipe.send.assert_called_once()
+                success, answer = pipe.send.call_args.args[0]
+
+                self.assertTrue(success)
+                self.assertEqual(json.loads(answer), expected)
+                self.assertEqual(ledger.status()["requests"], 1)
+                self.assertEqual(ledger.status()["unresolved"], 0)
+
+                client.close.assert_called_once()
+                pipe.close.assert_called_once()
 
     def test_gateway_deadline_cleans_up_transport(self):
-        adapter = Ollama("example", "synthetic-model", "YES")
+        adapter = Ollama("example", "gpt-oss:20b", "YES")
         with patch("provider.multiprocessing.get_context") as get_context, \
                 patch("provider.time.monotonic", side_effect=[0, 21]):
             ctx = get_context.return_value

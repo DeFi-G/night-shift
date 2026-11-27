@@ -146,3 +146,56 @@ footer {
     .top {height: 58px;}
     .hero {padding: 8px 0 18px;}
 }
+
+
+/* V14 - Customer report presentation */
+.report-section {
+    border-top: 1px solid #302b40;
+    padding: 18px 0;
+}
+.report-section h3 {
+    margin: 0 0 14px;
+    font-size: 17px;
+    color: #e4d9ff;
+}
+.report-section h4 {
+    margin: 0 0 12px;
+    overflow-wrap: anywhere;
+}
+.computed-panel {
+    background: #090a11;
+    border: 1px solid #302b40;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+.report-table-wrap {
+    overflow-x: auto;
+    margin: 12px 0;
+}
+.report-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+.report-table-wrap th,
+.report-table-wrap td {
+    padding: 10px;
+    border-bottom: 1px solid #302b40;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+.report-table-wrap th {
+    color: #c9b6ff;
+    background: #171321;
+}
+.verification-line {
+    font-size: 14px;
+    line-height: 1.6;
+}
+#computed small,
+#verification,
+#summary {
+    overflow-wrap: anywhere;
+}

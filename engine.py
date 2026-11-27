@@ -10,6 +10,8 @@ from pathlib import Path
 from shutil import rmtree
 
 from workspace import digest, ingest, tool
+from evidence_context import automatic_action
+from report_verification import verify_analytical_evidence
 
 ACTIVE = ("CLOCKED_IN", "WORKING", "VERIFYING")
 PENDING = ("QUEUED", *ACTIVE)
@@ -184,10 +186,34 @@ class Engine:
 
         observe({"tool": "inventory"})
         correction = ""
-        for attempt in range(1, 6):
+
+        if self.provider.mode == "ollama":
+            action = automatic_action(manifest)
+
+            if action is not None:
+                check()
+                try:
+                    observe(action)
+                except (ValueError, OSError):
+                    correction = (
+                        "Automatic evidence collection unavailable. "
+                        "Use permitted tools and state limitations."
+                    )
+                    record("WORKING", correction)
+        from inference_ledger import BUDGET, RESERVATION
+
+        if BUDGET % RESERVATION:
+            raise RuntimeError("Invalid inference budget allocation")
+
+        request_limit = BUDGET // RESERVATION
+
+        if not 1 <= request_limit <= 5:
+            raise RuntimeError("Invalid inference request limit")
+
+        for attempt in range(1, request_limit + 1):
             check()
             context = {"assignment": row["assignment"], "evidence": evidence,
-                       "requests_left": 6-attempt, "correction": correction}
+                       "requests_left": request_limit + 1 - attempt, "correction": correction}
             messages = [{"role": "system", "content": GUIDE},
                         {"role": "user", "content": json.dumps(context, ensure_ascii=False)}]
             raw = self.provider.ask(messages, check)
@@ -210,6 +236,9 @@ class Engine:
                             or any(type(i) is not int or not 1 <= i <= len(evidence) for i in refs)):
                         raise ValueError()
                     break
+                if attempt == request_limit or len(evidence) >= 6:
+                    raise ValueError("Investigation limit reached")
+
                 observe(action)
                 correction = ""
             except (ValueError, TypeError, RecursionError):
@@ -226,10 +255,15 @@ class Engine:
                 path = base / entry[key]
                 if path.resolve() != base / entry[key] or digest(path.read_bytes()) != entry["sha256"]:
                     raise RuntimeError("File integrity verification failed")
+        verification = verify_analytical_evidence(
+            root / "project", manifest, evidence, check
+        )
+
         report = {"job": job, "assignment": row["assignment"], "mode": self.provider.mode,
                   "summary": summary, "references": refs, "evidence": evidence, "inputs": manifest,
                   "inference_requests": attempt, "verified_at": now(),
-                  "scope": "Static inspection. Text reads sample 20 lines and searches sample 32 KiB per file, up to 20 hits. Excerpts show up to 240 characters per line."}
+                  "verification": verification,
+                  "scope": "Static inspection. Text reads sample 20 lines and searches sample 32 KiB per file, up to 20 hits. Excerpts show up to 240 characters per line. CSV analysis is bounded to 32 KiB, 200 rows and 16 columns. Complete collected evidence is retained; inference context may omit oversized results. File integrity verification does not certify every model-generated conclusion."}
         with self.db() as db:
             check()
             db.execute("UPDATE jobs SET report=? WHERE id=?", (json.dumps(report), job))
@@ -246,5 +280,20 @@ def markdown(report):
     for e in report["evidence"]:
         lines += ["", f"### E{e['id']} · {e['action']['tool']}", "",
                   block(json.dumps(e, indent=2, ensure_ascii=False))]
+    if "verification" in report:
+        lines += [
+            "",
+            "## Deterministic verification",
+            "",
+            "Computed findings below were recomputed from collected evidence.",
+            "The AI summary and recommendations are not independently certified.",
+            "",
+            block(json.dumps(
+                report["verification"],
+                indent=2,
+                ensure_ascii=False
+            ))
+        ]
+
     lines += ["", "## Verified input hashes", "", block(json.dumps(report["inputs"], indent=2)), ""]
     return "\n".join(lines)

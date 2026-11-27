@@ -1,3 +1,13 @@
+# Official Hacksgiving 2026 Release: V15
+
+See [V15 Release Notes](RELEASE-V15.md) for the latest
+qualification results, release selection and known limitations.
+
+The documentation and example evidence below may describe
+earlier development and qualification milestones.
+
+---
+
 # Night Shift
 
 ![Night Shift](web/logo.png)

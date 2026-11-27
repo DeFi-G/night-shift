@@ -45,7 +45,7 @@ context = {
         {"id": 2, "action": {"tool": "read", "path": "a.txt"},
          "result": [{"text": "Synthetic evidence"}]}
     ],
-    "requests_left": 3,
+    "requests_left": 1,
     "correction": ""
 }
 
@@ -96,7 +96,8 @@ with tempfile.TemporaryDirectory() as temp:
 
             request = json.loads(client.request.call_args.args[2])
 
-            assert "format" in request
+            assert isinstance(request["format"], dict)
+            assert request["format"]["type"] == "object"
             assert "tools" not in request
             assert request["stream"] is False
             assert "final report writer" in request["messages"][0]["content"]

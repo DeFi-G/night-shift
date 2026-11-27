@@ -5,10 +5,10 @@
     <h1><img src="/logo.png" alt="Night Shift. Clock out. We'll clock in."></h1>
     <p>Assign your work. Disconnect. Return to the evidence.</p>
     </div>
-<div class="grid"><section><h2>New assignment</h2><form id="form">
-<label for="assignment">What needs to be done?</label><textarea id="assignment" rows="5" maxlength="3000" required placeholder='Find every “TODO” and cite the files and lines.'></textarea>
-<label for="files">Project files <small>Optional</small></label><input id="files" type="file" multiple><small>Individual files or ZIP · 4 MiB total</small>
-<p id="privacy">Checking intelligence mode...</p>
+<div class="grid"><section><h2>What can we help you with today?</h2><form id="form">
+<label for="assignment">Your assignment</label><textarea id="assignment" rows="5" maxlength="3000" required placeholder="Type your assignment here..."></textarea>
+<label for="files">Attach your files <small>Optional</small></label><input id="files" type="file" multiple><small>Individual files or ZIP · 4 MiB total</small>
+<p><small>Your original files remain unchanged.</small></p><p id="privacy">Checking intelligence mode...</p>
 <label id="consentRow" hidden><input type="checkbox" id="consent"> Allow Ollama Cloud processing for this assignment</label>
 <button id="start" disabled>Assign &amp; Clock Out <span aria-hidden="true">↗</span></button></form></section>
 <section><div class="sectionhead"><h2>Shift activity</h2><b id="state">READY</b></div>
@@ -17,5 +17,22 @@
 <button class="secondary" id="cancel" hidden>Cancel assignment</button></section></div>
 <p role="status" id="notice"></p>
 <section id="results" hidden><div class="sectionhead"><h2>Completed report</h2><div><a id="md">Markdown ↓</a> <a id="json">JSON ↓</a></div></div>
-<p id="summary"></p><small id="scope"></small><div id="evidence"></div></section></main>
+<div class="report-section">
+<h3>AI findings and recommendations</h3>
+<p id="summary"></p>
+<small>AI-generated conclusions are not independently certified.</small>
+</div>
+<div class="report-section" id="computedSection" hidden>
+<h3>Computed findings</h3>
+<div id="computed"></div>
+</div>
+<div class="report-section">
+<h3>Verification and limitations</h3>
+<div id="verification"></div>
+<small id="scope"></small>
+</div>
+<div class="report-section">
+<h3>Supporting evidence</h3>
+<div id="evidence"></div>
+</div></section></main>
 <footer class="wrap">NIGHT SHIFT &middot; Built by DeFi Network.</footer></body></html>

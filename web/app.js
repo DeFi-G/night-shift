@@ -1,3 +1,193 @@
+
+function reportElement(tag, value, className) {
+  const element = document.createElement(tag);
+  if (value !== undefined) element.textContent = String(value);
+  if (className) element.className = className;
+  return element;
+}
+
+function reportTable(headers, rows) {
+  const wrapper = reportElement("div", undefined, "report-table-wrap");
+  const table = document.createElement("table");
+  const head = document.createElement("thead");
+  const header = document.createElement("tr");
+
+  for (const value of headers) {
+    const cell = reportElement("th", value);
+    cell.scope = "col";
+    header.append(cell);
+  }
+
+  head.append(header);
+  table.append(head);
+
+  const body = document.createElement("tbody");
+
+  for (const row of rows) {
+    const tr = document.createElement("tr");
+    for (const value of row) {
+      tr.append(reportElement("td", value));
+    }
+    body.append(tr);
+  }
+
+  table.append(body);
+  wrapper.append(table);
+  return wrapper;
+}
+
+function renderVerification(report) {
+  const target = $("verification");
+  const computed = $("computed");
+  const v = report.verification;
+
+  target.replaceChildren();
+  computed.replaceChildren();
+  $("computedSection").hidden = true;
+
+  if (!v) {
+    target.append(reportElement(
+      "p",
+      "Historical report. Enhanced verification record unavailable."
+    ));
+    return;
+  }
+
+  target.append(reportElement(
+    "p",
+    v.input_integrity === "verified"
+      ? "Source integrity: verified."
+      : "Source integrity: not established.",
+    "verification-line"
+  ));
+
+  target.append(reportElement(
+    "p",
+    v.analytical_status === "recomputed_match"
+      ? "Analytical evidence: recomputed and matched."
+      : "Analytical recomputation: not applicable.",
+    "verification-line"
+  ));
+
+  target.append(reportElement(
+    "p",
+    "AI summary and recommendations: not independently verified.",
+    "verification-line"
+  ));
+
+  const findings = Array.isArray(v.analytical_findings)
+    ? v.analytical_findings : [];
+
+  for (const finding of findings) {
+    if (finding.status !== "recomputed_match") continue;
+
+    const result = finding.result;
+    if (!result || typeof result !== "object") continue;
+
+    const panel = reportElement(
+      "div", undefined, "computed-panel"
+    );
+
+    if (finding.tool === "calculate") {
+      panel.append(reportElement(
+        "h4", "Calculation - E" + finding.evidence_id
+      ));
+
+      panel.append(reportTable(
+        ["Operation", "Left", "Right", "Result"],
+        [[
+          result.operation,
+          result.left,
+          result.right,
+          result.result
+        ]]
+      ));
+
+      if (result.precision !== undefined) {
+        panel.append(reportElement(
+          "small",
+          "Decimal precision: " + result.precision
+        ));
+      }
+
+    } else if (
+      finding.tool === "analyze_csv" && result.analysis
+    ) {
+      const a = result.analysis;
+
+      panel.append(reportElement(
+        "h4", result.path + " - E" + finding.evidence_id
+      ));
+
+      panel.append(reportElement(
+        "p", "Rows analyzed: " + a.row_count
+      ));
+
+      const rows = Object.entries(a.numeric || {}).map(
+        ([column, stats]) => [
+          column,
+          stats.count,
+          stats.sum,
+          stats.minimum,
+          stats.maximum
+        ]
+      );
+
+      if (rows.length) {
+        panel.append(reportTable(
+          ["Column", "Count", "Sum", "Minimum", "Maximum"],
+          rows
+        ));
+      }
+
+      for (const [category, groups] of Object.entries(
+        a.grouped || {}
+      )) {
+        const groupedRows = [];
+
+        for (const [label, group] of Object.entries(groups)) {
+          for (const [column, total] of Object.entries(
+            group.totals || {}
+          )) {
+            groupedRows.push([
+              label, column, group.count, total
+            ]);
+          }
+        }
+
+        if (groupedRows.length) {
+          const details = document.createElement("details");
+
+          details.append(reportElement(
+            "summary", "Grouped totals: " + category
+          ));
+
+          details.append(reportTable(
+            ["Group", "Column", "Count", "Total"],
+            groupedRows
+          ));
+
+          panel.append(details);
+        }
+      }
+
+      panel.append(reportElement(
+        "small",
+        "Numeric identifiers may not represent meaningful totals. " +
+        "See supporting evidence for full statistics and source lines."
+      ));
+
+    } else {
+      continue;
+    }
+
+    computed.append(panel);
+  }
+
+  $("computedSection").hidden = !computed.childElementCount;
+}
+
+
 "use strict";
 const $ = id => document.getElementById(id);
 let current = "", mode = "", busy = false;
@@ -11,6 +201,8 @@ async function api(path, data) {
 }
 function showError(e) { $("notice").textContent = e.message; }
 let evidenceJob = "";
+let renderedReportJob = "";
+let renderedReportContent = "";
 function draw(job) {
   $("state").textContent = job.state;
   $("state").dataset.state = job.state;
@@ -35,9 +227,22 @@ function draw(job) {
   }));
   const r = job.report;
   $("results").hidden = !r;
-  if (!r) return;
+  if (!r) {
+    renderedReportJob = "";
+    renderedReportContent = "";
+    return;
+  }
+
+  const reportContent = JSON.stringify(r);
+
+  if (
+    renderedReportJob === job.id &&
+    renderedReportContent === reportContent
+  ) return;
+
   $("summary").textContent = r.summary + "  [" + r.references.map(i=>"E"+i).join(", ") + "]";
   $("scope").textContent = r.scope;
+  renderVerification(r);
   $("md").href = "/api/jobs/"+job.id+"/report.md";
   $("json").href = "/api/jobs/"+job.id+"/report.json";
   const expanded = evidenceJob === job.id
@@ -51,6 +256,9 @@ function draw(job) {
     title.textContent = "E"+e.id+" · "+e.action.tool;
     pre.textContent = JSON.stringify(e, null, 2); d.append(title,pre); return d;
   }));
+
+  renderedReportJob = job.id;
+  renderedReportContent = reportContent;
 }
 async function refresh() {
   if (busy) return;

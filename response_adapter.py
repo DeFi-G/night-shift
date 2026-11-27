@@ -32,7 +32,9 @@ SCHEMAS = {
     "inventory": set(),
     "inspect": set(),
     "read": {"path"},
-    "search": {"query"}
+    "search": {"query"},
+    "analyze_csv": {"path"},
+    "calculate": {"operation", "left", "right"}
 }
 
 def validate(action):
@@ -68,6 +70,20 @@ def validate(action):
         value = action[key]
         if not isinstance(value, str) or not value.strip():
             raise ValueError("Invalid tool argument")
+
+    if name == "calculate":
+        from analytics import number
+
+        if action["operation"] not in (
+            "add", "subtract", "multiply", "divide", "percent"
+        ):
+            raise ValueError("Unsupported calculation")
+
+        number(action["left"])
+        denominator = number(action["right"])
+
+        if action["operation"] in ("divide", "percent") and denominator == 0:
+            raise ValueError("Division by zero")
 
     return action
 

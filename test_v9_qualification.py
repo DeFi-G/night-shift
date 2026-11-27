@@ -226,7 +226,6 @@ class JobTests(unittest.TestCase):
 
     def test_gateway_contract_and_live_gate(self):
         from inference_ledger import Ledger, MODEL
-        from provider import TOOLS
 
         with self.assertRaises(ValueError):
             Ollama("example", MODEL, "")
@@ -277,7 +276,8 @@ class JobTests(unittest.TestCase):
 
                 self.assertFalse(payload["stream"])
                 self.assertEqual(payload["model"], MODEL)
-                self.assertEqual(payload["tools"], TOOLS)
+                self.assertEqual(payload["format"], "json")
+                self.assertNotIn("tools", payload)
                 self.assertEqual(payload["options"]["num_ctx"], 8192)
                 self.assertEqual(payload["options"]["num_predict"], 512)
                 self.assertNotIn("Authorization", headers)
